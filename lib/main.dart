@@ -18,7 +18,7 @@ Future main() async {
           create: (context) => PlanetCubit(),
         ),
       ],
-      child: MaterialApp(
+      child: const MaterialApp(
         debugShowCheckedModeBanner: false,
         home: View(),
       ),

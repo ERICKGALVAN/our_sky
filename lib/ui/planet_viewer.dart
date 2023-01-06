@@ -6,7 +6,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:model_viewer_plus/model_viewer_plus.dart';
 import 'package:our_sky/bloc/planet_cubit/planet_cubit.dart';
 import 'package:our_sky/painters/star_painter.dart';
-import 'package:our_sky/services/astronomy_service.dart';
 
 import '../models/star_model.dart';
 

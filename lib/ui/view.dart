@@ -7,6 +7,7 @@ import 'package:location/location.dart' as location_manager;
 import 'package:our_sky/models/star_model.dart';
 import 'package:our_sky/painters/saturn_rings_painter.dart';
 import 'package:our_sky/services/astronomy_service.dart';
+import 'package:our_sky/ui/menu.dart';
 import 'package:our_sky/ui/planet_viewer.dart';
 
 import '../bloc/bodies_cubit/bodies_cubit.dart';
@@ -80,18 +81,7 @@ class _ViewState extends State<View> with SingleTickerProviderStateMixin {
       _moonImage = res['data']['imageUrl'];
       developer.log(_moonImage);
     });
-    String hour = dateTime.hour.toString();
-    String minute = dateTime.minute.toString();
-    String second = dateTime.second.toString();
-    if (dateTime.hour.toString().length == 1) {
-      hour = '0${dateTime.hour}';
-    }
-    if (dateTime.minute.toString().length == 1) {
-      minute = '0${dateTime.minute}';
-    }
-    if (dateTime.second.toString().length == 1) {
-      second = '0${dateTime.second}';
-    }
+
     await bodiesCubit.getBodies(
       _latitude,
       _longitude,
@@ -183,14 +173,29 @@ class _ViewState extends State<View> with SingleTickerProviderStateMixin {
         title: const Text('Solar System'),
         leading: IconButton(
           onPressed: () {
-            setState(() {
-              _showBar = !_showBar;
-            });
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const Menu(),
+              ),
+            );
           },
-          icon: Icon(
-            _showBar ? Icons.chevron_left : Icons.chevron_right,
+          icon: const Icon(
+            Icons.menu,
           ),
         ),
+        actions: [
+          IconButton(
+            onPressed: () {
+              setState(() {
+                _showBar = !_showBar;
+              });
+            },
+            icon: Icon(
+              _showBar ? Icons.chevron_left : Icons.chevron_right,
+            ),
+          ),
+        ],
       ),
       body: Container(
         color: const Color.fromARGB(255, 1, 1, 53),

@@ -234,17 +234,19 @@ class ExtraInfo {
   Phase? phase;
 
   factory ExtraInfo.fromJson(Map<String, dynamic> json) => ExtraInfo(
-        elongation:
-            json["elongation"] == null ? null : json["elongation"].toDouble(),
-        magnitude:
-            json["magnitude"] == null ? null : json["magnitude"].toDouble(),
+        elongation: json["elongation"] == null
+            ? null
+            : double.parse(json["elongation"].toString()),
+        magnitude: json["magnitude"] == null
+            ? null
+            : double.parse(json["magnitude"].toString()),
         phase: json["phase"] == null ? null : Phase.fromJson(json["phase"]),
       );
 
   Map<String, dynamic> toJson() => {
-        "elongation": elongation == null ? null : elongation,
-        "magnitude": magnitude == null ? null : magnitude,
-        "phase": phase == null ? null : phase?.toJson(),
+        "elongation": elongation,
+        "magnitude": magnitude,
+        "phase": phase,
       };
 }
 
