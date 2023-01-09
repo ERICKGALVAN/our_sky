@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_compass/flutter_compass.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:location/location.dart';
 import 'package:panorama/panorama.dart';
@@ -18,7 +20,20 @@ class SkyPanoram extends StatefulWidget {
 class _SkyPanoramState extends State<SkyPanoram> {
   @override
   void didChangeDependencies() async {
+    setState(() {
+      _isLoading = true;
+    });
     await loadData();
+    await FlutterCompass.events!.first.then((CompassEvent event) {
+      setState(() {
+        log('CompassEvent: $event');
+        _compass = event.heading!;
+      });
+    });
+
+    setState(() {
+      _isLoading = false;
+    });
 
     super.didChangeDependencies();
   }
@@ -130,6 +145,7 @@ class _SkyPanoramState extends State<SkyPanoram> {
   String _longitude = '';
   int _altitude = 0;
   bool _isLoading = false;
+  double _compass = 0.0;
   final List<Hotspot> _bodies = [
     Hotspot(
       latitude: 0.0,
@@ -198,7 +214,11 @@ class _SkyPanoramState extends State<SkyPanoram> {
         child: _isLoading
             ? const CircularProgressIndicator()
             : Panorama(
-                zoom: 0.5,
+                longitude: _compass,
+                latitude: 0,
+                animSpeed: 0.000000000000001,
+                interactive: false,
+                sensorControl: SensorControl.AbsoluteOrientation,
                 hotspots: _bodies,
                 child: Image.asset('assets/three.jpg'),
               ),
