@@ -45,7 +45,6 @@ class _PlanetViewerState extends State<PlanetViewer>
     final planetCubit = BlocProvider.of<PlanetCubit>(context);
     await planetCubit.getPlanetInformation(widget.planetName);
     developer.log(planetCubit.planetInformation!.bodyType);
-
     setState(() {
       _isLoading = false;
     });

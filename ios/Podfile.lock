@@ -1,38 +1,64 @@
 PODS:
   - Flutter (1.0.0)
-  - flutter_inappwebview (0.0.1):
+  - flutter_compass (0.0.1):
     - Flutter
-    - flutter_inappwebview/Core (= 0.0.1)
-    - OrderedSet (~> 5.0)
-  - flutter_inappwebview/Core (0.0.1):
+  - flutter_native_splash (0.0.1):
     - Flutter
-    - OrderedSet (~> 5.0)
   - location (0.0.1):
     - Flutter
-  - OrderedSet (5.0.0)
+  - motion_sensors (0.0.1):
+    - Flutter
+  - path_provider_foundation (0.0.1):
+    - Flutter
+    - FlutterMacOS
+  - sensors_plus (0.0.1):
+    - Flutter
+  - url_launcher_ios (0.0.1):
+    - Flutter
+  - webview_flutter_wkwebview (0.0.1):
+    - Flutter
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
-  - flutter_inappwebview (from `.symlinks/plugins/flutter_inappwebview/ios`)
+  - flutter_compass (from `.symlinks/plugins/flutter_compass/ios`)
+  - flutter_native_splash (from `.symlinks/plugins/flutter_native_splash/ios`)
   - location (from `.symlinks/plugins/location/ios`)
-
-SPEC REPOS:
-  trunk:
-    - OrderedSet
+  - motion_sensors (from `.symlinks/plugins/motion_sensors/ios`)
+  - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/ios`)
+  - sensors_plus (from `.symlinks/plugins/sensors_plus/ios`)
+  - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
+  - webview_flutter_wkwebview (from `.symlinks/plugins/webview_flutter_wkwebview/ios`)
 
 EXTERNAL SOURCES:
   Flutter:
     :path: Flutter
-  flutter_inappwebview:
-    :path: ".symlinks/plugins/flutter_inappwebview/ios"
+  flutter_compass:
+    :path: ".symlinks/plugins/flutter_compass/ios"
+  flutter_native_splash:
+    :path: ".symlinks/plugins/flutter_native_splash/ios"
   location:
     :path: ".symlinks/plugins/location/ios"
+  motion_sensors:
+    :path: ".symlinks/plugins/motion_sensors/ios"
+  path_provider_foundation:
+    :path: ".symlinks/plugins/path_provider_foundation/ios"
+  sensors_plus:
+    :path: ".symlinks/plugins/sensors_plus/ios"
+  url_launcher_ios:
+    :path: ".symlinks/plugins/url_launcher_ios/ios"
+  webview_flutter_wkwebview:
+    :path: ".symlinks/plugins/webview_flutter_wkwebview/ios"
 
 SPEC CHECKSUMS:
   Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
-  flutter_inappwebview: bfd58618f49dc62f2676de690fc6dcda1d6c3721
+  flutter_compass: cbbd285cea1584c7ac9c4e0c3e1f17cbea55e855
+  flutter_native_splash: 52501b97d1c0a5f898d687f1646226c1f93c56ef
   location: 3a2eed4dd2fab25e7b7baf2a9efefe82b512d740
-  OrderedSet: aaeb196f7fef5a9edf55d89760da9176ad40b93c
+  motion_sensors: 03f55b7c637a7e365a0b5f9697a449f9059d5d91
+  path_provider_foundation: 37748e03f12783f9de2cb2c4eadfaa25fe6d4852
+  sensors_plus: 5717760720f7e6acd96fdbd75b7428f5ad755ec2
+  url_launcher_ios: ae1517e5e344f5544fb090b079e11f399dfbe4d2
+  webview_flutter_wkwebview: b7e70ef1ddded7e69c796c7390ee74180182971f
 
 PODFILE CHECKSUM: ef19549a9bc3046e7bb7d2fab4d021637c0c58a3
 

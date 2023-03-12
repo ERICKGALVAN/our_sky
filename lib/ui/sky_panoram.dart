@@ -26,7 +26,6 @@ class _SkyPanoramState extends State<SkyPanoram> {
     await loadData();
     await FlutterCompass.events!.first.then((CompassEvent event) {
       setState(() {
-        log('CompassEvent: $event');
         _compass = event.heading!;
       });
     });
@@ -85,11 +84,9 @@ class _SkyPanoramState extends State<SkyPanoram> {
         if (longitude > 180) {
           longitude = longitude - 360;
         }
-        double latitude = double.parse(body
-                    .cells[0].position.horizontal.altitude.degrees
-                    .toString()) *
-                1.6 -
-            55;
+        double latitude = double.parse(
+            body.cells[0].position.horizontal.altitude.degrees.toString());
+        //* 1.6 - 55;
 
         _visible.add({
           'name': name,

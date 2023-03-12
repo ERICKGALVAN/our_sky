@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:location/location.dart' as location_manager;
 import 'package:our_sky/models/star_model.dart';
-import 'package:our_sky/painters/saturn_rings_painter.dart';
 import 'package:our_sky/services/astronomy_service.dart';
 import 'package:our_sky/ui/menu.dart';
 import 'package:our_sky/ui/planet_viewer.dart';
@@ -28,7 +27,7 @@ class _ViewState extends State<View> with SingleTickerProviderStateMixin {
       duration: const Duration(seconds: 5),
     );
     _stars = List.generate(
-      150000,
+      100000,
       (index) => StarModel(
         positionX: Random().nextDouble() * 900,
         positionY: Random().nextDouble() * 900,
@@ -60,6 +59,21 @@ class _ViewState extends State<View> with SingleTickerProviderStateMixin {
     super.didChangeDependencies();
   }
 
+  Future _openCalendar() async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _dateTime,
+      firstDate: DateTime(1900),
+      lastDate: DateTime(2100),
+    );
+    if (picked != null && picked != _dateTime) {
+      setState(() {
+        _dateTime = picked;
+      });
+      await loadData();
+    }
+  }
+
   Future<void> getCurrentLocation() async {
     location_manager.Location location = location_manager.Location();
     location.hasPermission();
@@ -71,11 +85,14 @@ class _ViewState extends State<View> with SingleTickerProviderStateMixin {
   }
 
   Future<void> loadData() async {
+    setState(() {
+      _isLoading = true;
+    });
+    _bodies.clear();
     final bodiesCubit = BlocProvider.of<BodiesCubit>(context);
-    final DateTime dateTime = DateTime.now();
     await AstronomyService()
         .getMoonPhase(double.parse(_latitude), double.parse(_longitude),
-            dateTime.toString().split(' ')[0])
+            _dateTime.toString().split(' ')[0])
         .then((value) {
       final res = jsonDecode(value.body);
       _moonImage = res['data']['imageUrl'];
@@ -86,73 +103,30 @@ class _ViewState extends State<View> with SingleTickerProviderStateMixin {
       _latitude,
       _longitude,
       _altitude,
-      dateTime.toString().split(' ')[0],
-      dateTime.toString().split(' ')[0],
+      _dateTime.toString().split(' ')[0],
+      _dateTime.toString().split(' ')[0],
       '15:00:00',
     );
 
     for (var body in bodiesCubit.bodiesModel!.data.table.rows) {
-      if (body.cells[0].name != 'Moon') {
-        final distance = double.parse(body.cells[0].distance.fromEarth.au);
-        final degrees =
-            double.parse(body.cells[0].position.horizontal.azimuth.degrees);
-        final x = distance * 6 * cos(degrees * pi / 180);
-        final y = distance * 6 * sin(degrees * pi / 180);
-        _bodies.add({
-          'name': body.cells[0].name,
-          'positionX': x,
-          'positionY': y,
-          'color': _bodiesProperties.firstWhere(
-              (element) => element['name'] == body.cells[0].name)['color'],
-        });
-      }
+      final distance = double.parse(body.cells[0].distance.fromEarth.au);
+      final degrees =
+          double.parse(body.cells[0].position.horizontal.azimuth.degrees);
+      final x = distance * 6 * cos(degrees * pi / 180);
+      final y = distance * 6 * sin(degrees * pi / 180);
+      _bodies.add({
+        'name': body.cells[0].name,
+        'positionX': x,
+        'positionY': y,
+      });
     }
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   AnimationController? _animationController;
   List<StarModel> _stars = [];
-  final List<Map<String, dynamic>> _bodiesProperties = [
-    {
-      'name': 'Sun',
-      'color': Colors.yellow,
-    },
-    {
-      'name': 'Mercury',
-      'color': const Color.fromRGBO(178, 123, 58, 1),
-    },
-    {
-      'name': 'Venus',
-      'color': const Color.fromRGBO(221, 176, 116, 1),
-    },
-    {
-      'name': 'Earth',
-      'color': Colors.blue,
-    },
-    {
-      'name': 'Mars',
-      'color': Colors.red,
-    },
-    {
-      'name': 'Jupiter',
-      'color': const Color.fromRGBO(201, 176, 134, 1),
-    },
-    {
-      'name': 'Saturn',
-      'color': const Color.fromRGBO(205, 153, 77, 1),
-    },
-    {
-      'name': 'Uranus',
-      'color': const Color.fromRGBO(3, 139, 143, 1),
-    },
-    {
-      'name': 'Neptune',
-      'color': const Color.fromRGBO(66, 112, 243, 1),
-    },
-    {
-      'name': 'Pluto',
-      'color': const Color.fromRGBO(177, 165, 155, 1),
-    },
-  ];
 
   String _latitude = '';
   String _longitude = '';
@@ -161,6 +135,7 @@ class _ViewState extends State<View> with SingleTickerProviderStateMixin {
   final List<Map<String, dynamic>> _bodies = [];
   String _moonImage = '';
   bool _showBar = true;
+  DateTime _dateTime = DateTime.now();
 
   final viewTransformationController = TransformationController();
 
@@ -170,7 +145,11 @@ class _ViewState extends State<View> with SingleTickerProviderStateMixin {
       appBar: AppBar(
         elevation: 0,
         backgroundColor: const Color.fromARGB(255, 1, 1, 53),
-        title: const Text('Solar System'),
+        title: const FittedBox(
+          child: Text(
+            'Our Solar System',
+          ),
+        ),
         leading: IconButton(
           onPressed: () {
             Navigator.push(
@@ -185,6 +164,14 @@ class _ViewState extends State<View> with SingleTickerProviderStateMixin {
           ),
         ),
         actions: [
+          IconButton(
+            onPressed: () {
+              _openCalendar();
+            },
+            icon: const Icon(
+              Icons.calendar_month,
+            ),
+          ),
           IconButton(
             onPressed: () {
               setState(() {
@@ -204,34 +191,23 @@ class _ViewState extends State<View> with SingleTickerProviderStateMixin {
             _isLoading || !_showBar
                 ? const SizedBox()
                 : Positioned(
-                    top: 50,
+                    top: 5,
                     child: Material(
                       color: Colors.transparent,
-                      child: InkWell(
-                        onTap: () {
-                          developer.log('pressed');
-                        },
-                        child: Column(
-                          children: [
-                            InkWell(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => const PlanetViewer(
-                                      planetName: 'moon',
-                                    ),
-                                  ),
-                                );
-                              },
-                              child: Image.network(
-                                _moonImage,
-                                width: 100,
-                                height: 200,
-                              ),
+                      child: Column(
+                        children: [
+                          Text(
+                            _dateTime.toString().split(' ')[0],
+                            style: const TextStyle(
+                              color: Colors.white,
                             ),
-                          ],
-                        ),
+                          ),
+                          Image.network(
+                            _moonImage,
+                            width: 100,
+                            height: 200,
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -259,7 +235,6 @@ class _ViewState extends State<View> with SingleTickerProviderStateMixin {
                                       element['positionY'],
                                   child: GestureDetector(
                                     onTap: () {
-                                      developer.log(element['name']);
                                       Navigator.push(
                                         context,
                                         MaterialPageRoute(
@@ -272,34 +247,61 @@ class _ViewState extends State<View> with SingleTickerProviderStateMixin {
                                     child: Column(
                                       children: [
                                         Text(
-                                          element['name'],
-                                          style: const TextStyle(
+                                          element['name'] == 'Moon'
+                                              ? ''
+                                              : element['name'],
+                                          style: TextStyle(
                                             color: Colors.white,
-                                            fontSize: 1,
+                                            fontSize: element['name'] == 'Moon'
+                                                ? 0.5
+                                                : 1,
                                             decoration: TextDecoration.none,
                                           ),
                                         ),
-                                        CustomPaint(
-                                          painter: SaturnRingsPainter(),
-                                          child: Container(
-                                            width: .8,
-                                            height: .8,
-                                            decoration: BoxDecoration(
-                                              color: element['color'],
-                                              shape: BoxShape.circle,
-                                              boxShadow: [
-                                                BoxShadow(
-                                                  color:
-                                                      element['name'] == 'Sun'
-                                                          ? Colors.yellow
-                                                          : Colors.transparent,
-                                                  blurRadius: 1,
-                                                  spreadRadius: 1,
-                                                ),
-                                              ],
-                                            ),
+                                        Container(
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: element['name'] == 'Sun'
+                                                    ? Colors.yellow
+                                                    : Colors.transparent,
+                                                blurRadius: 1,
+                                                spreadRadius: 1,
+                                              ),
+                                            ],
                                           ),
+                                          child: Image.asset(
+                                              'assets/${element['name'].toString().toLowerCase()}.png',
+                                              width: element['name'] == 'Moon'
+                                                  ? 0.5
+                                                  : 1,
+                                              height: element['name'] == 'Moon'
+                                                  ? 0.5
+                                                  : .8),
                                         ),
+
+                                        // Container(
+                                        //   width: element['name'] == 'Moon'
+                                        //       ? 0.5
+                                        //       : .8,
+                                        //   height: element['name'] == 'Moon'
+                                        //       ? 0.5
+                                        //       : .8,
+                                        //   decoration: BoxDecoration(
+                                        //     color: element['color'],
+                                        //     shape: BoxShape.circle,
+                                        //     boxShadow: [
+                                        //       BoxShadow(
+                                        //         color: element['name'] == 'Sun'
+                                        //             ? Colors.yellow
+                                        //             : Colors.transparent,
+                                        //         blurRadius: 1,
+                                        //         spreadRadius: 1,
+                                        //       ),
+                                        //     ],
+                                        //   ),
+                                        // ),
                                       ],
                                     ),
                                   ),

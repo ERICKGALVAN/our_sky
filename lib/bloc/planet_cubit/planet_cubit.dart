@@ -1,7 +1,6 @@
 import 'dart:developer';
 
 import 'package:bloc/bloc.dart';
-import 'package:meta/meta.dart';
 
 import '../../models/planet_model.dart';
 import '../../services/astronomy_service.dart';
