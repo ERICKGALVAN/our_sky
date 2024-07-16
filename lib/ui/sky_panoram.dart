@@ -6,7 +6,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_compass/flutter_compass.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:location/location.dart';
-import 'package:panorama/panorama.dart';
+import 'package:our_sky/bloc/background_cubit/background_cubit.dart';
+import 'package:our_sky/bloc/font_color_cubit/font_color_cubit.dart';
+import 'package:our_sky/bloc/font_cubit/font_cubit.dart';
+import 'package:our_sky/constants/constants.dart';
+import 'package:panorama_viewer/panorama_viewer.dart';
 
 import '../bloc/bodies_cubit/bodies_cubit.dart';
 
@@ -43,6 +47,11 @@ class _SkyPanoramState extends State<SkyPanoram> {
     });
     final bodiesCubit = BlocProvider.of<BodiesCubit>(context);
     final DateTime dateTime = DateTime.now();
+    final font = BlocProvider.of<FontCubit>(context).state as FontChange;
+    _font = font.font;
+    final fontColor =
+        BlocProvider.of<FontColorCubit>(context).state as FontColorChange;
+    _fontColor = fontColor.fontColor;
 
     Location location = Location();
     location.hasPermission();
@@ -70,7 +79,7 @@ class _SkyPanoramState extends State<SkyPanoram> {
       _altitude,
       dateTime.toString().split(' ')[0],
       dateTime.toString().split(' ')[0],
-      '$hour:$minute:$second',
+      monthTimes[dateTime.month]!,
     );
 
     for (var body in bodiesCubit.bodiesModel!.data.table.rows) {
@@ -107,8 +116,12 @@ class _SkyPanoramState extends State<SkyPanoram> {
                 Text(
                   name,
                   style: TextStyle(
-                    color: Colors.white,
-                    fontFamily: GoogleFonts.rajdhani().fontFamily,
+                    color: _fontColor == null
+                        ? fontColors['black']
+                        : fontColors[_fontColor!],
+                    fontFamily: _font == null
+                        ? fonts['roboto']!.fontFamily
+                        : fonts[_font!]!.fontFamily,
                   ),
                 ),
                 Image.asset(
@@ -133,6 +146,87 @@ class _SkyPanoramState extends State<SkyPanoram> {
         });
       }
     }
+    _bodies.add(
+      Hotspot(
+        latitude: 0.0,
+        longitude: 0.0,
+        width: 180.0,
+        height: 190.0,
+        widget: Text(
+          'North',
+          style: TextStyle(
+            color: _fontColor == null
+                ? fontColors['black']
+                : fontColors[_fontColor!],
+            fontFamily: _font == null
+                ? fonts['roboto']!.fontFamily
+                : fonts[_font!]!.fontFamily,
+            fontSize: 45,
+          ),
+        ),
+      ),
+    );
+    _bodies.add(
+      Hotspot(
+        latitude: 0.0,
+        longitude: 180.0,
+        width: 180.0,
+        height: 190.0,
+        widget: Text(
+          'South',
+          style: TextStyle(
+            color: _fontColor == null
+                ? fontColors['black']
+                : fontColors[_fontColor!],
+            fontFamily: _font == null
+                ? fonts['roboto']!.fontFamily
+                : fonts[_font!]!.fontFamily,
+            fontSize: 45,
+          ),
+        ),
+      ),
+    );
+    _bodies.add(
+      Hotspot(
+        latitude: 0.0,
+        longitude: 90.0,
+        width: 180.0,
+        height: 190.0,
+        widget: Text(
+          'East',
+          style: TextStyle(
+            color: _fontColor == null
+                ? fontColors['black']
+                : fontColors[_fontColor!],
+            fontFamily: _font == null
+                ? fonts['roboto']!.fontFamily
+                : fonts[_font!]!.fontFamily,
+            fontSize: 45,
+          ),
+        ),
+      ),
+    );
+    _bodies.add(
+      Hotspot(
+        latitude: 0.0,
+        longitude: -90.0,
+        width: 180.0,
+        height: 190.0,
+        widget: Text(
+          'West',
+          style: TextStyle(
+            color: _fontColor == null
+                ? fontColors['black']
+                : fontColors[_fontColor!],
+            fontFamily: _font == null
+                ? fonts['roboto']!.fontFamily
+                : fonts[_font!]!.fontFamily,
+            fontSize: 45,
+          ),
+        ),
+      ),
+    );
+
     setState(() {
       _isLoading = false;
     });
@@ -143,64 +237,9 @@ class _SkyPanoramState extends State<SkyPanoram> {
   int _altitude = 0;
   bool _isLoading = false;
   double _compass = 0.0;
-  final List<Hotspot> _bodies = [
-    Hotspot(
-      latitude: 0.0,
-      longitude: 0.0,
-      width: 180.0,
-      height: 190.0,
-      widget: Text(
-        'North',
-        style: TextStyle(
-          color: const Color.fromARGB(255, 219, 103, 21),
-          fontFamily: GoogleFonts.abrilFatface().fontFamily,
-          fontSize: 45,
-        ),
-      ),
-    ),
-    Hotspot(
-      latitude: 0.0,
-      longitude: 180.0,
-      width: 180.0,
-      height: 190.0,
-      widget: Text(
-        'South',
-        style: TextStyle(
-          color: const Color.fromARGB(255, 219, 103, 21),
-          fontFamily: GoogleFonts.abrilFatface().fontFamily,
-          fontSize: 45,
-        ),
-      ),
-    ),
-    Hotspot(
-      latitude: 0.0,
-      longitude: 90.0,
-      width: 180.0,
-      height: 190.0,
-      widget: Text(
-        'East',
-        style: TextStyle(
-          color: const Color.fromARGB(255, 219, 103, 21),
-          fontFamily: GoogleFonts.abrilFatface().fontFamily,
-          fontSize: 45,
-        ),
-      ),
-    ),
-    Hotspot(
-      latitude: 0.0,
-      longitude: -90.0,
-      width: 180.0,
-      height: 190.0,
-      widget: Text(
-        'West',
-        style: TextStyle(
-          color: const Color.fromARGB(255, 219, 103, 21),
-          fontFamily: GoogleFonts.abrilFatface().fontFamily,
-          fontSize: 45,
-        ),
-      ),
-    ),
-  ];
+  String? _font;
+  String? _fontColor;
+  final List<Hotspot> _bodies = [];
   final List<Map<String, dynamic>> _visible = [];
   final List<Map<String, dynamic>> _notVisible = [];
 
@@ -210,14 +249,31 @@ class _SkyPanoramState extends State<SkyPanoram> {
       body: Center(
         child: _isLoading
             ? const CircularProgressIndicator()
-            : Panorama(
-                longitude: _compass,
-                latitude: 0,
-                animSpeed: 0.000000000000001,
-                interactive: false,
-                sensorControl: SensorControl.AbsoluteOrientation,
-                hotspots: _bodies,
-                child: Image.asset('assets/three.jpg'),
+            : BlocBuilder<BackgroundCubit, BackgroundState>(
+                builder: (context, state) {
+                  if (state is BackgroundImage) {
+                    return PanoramaViewer(
+                      longitude: _compass,
+                      latitude: 0,
+                      animSpeed: 0.000000000000001,
+                      interactive: false,
+                      sensorControl: SensorControl.absoluteOrientation,
+                      hotspots: _bodies,
+                      child: Image.asset(
+                        state.imagePath,
+                      ),
+                    );
+                  }
+                  return PanoramaViewer(
+                    longitude: _compass,
+                    latitude: 0,
+                    animSpeed: 0.000000000000001,
+                    interactive: false,
+                    sensorControl: SensorControl.absoluteOrientation,
+                    hotspots: _bodies,
+                    child: Image.asset('assets/newyork.jpg'),
+                  );
+                },
               ),
       ),
     );

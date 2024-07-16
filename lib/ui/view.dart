@@ -4,6 +4,7 @@ import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:location/location.dart' as location_manager;
+import 'package:our_sky/constants/constants.dart';
 import 'package:our_sky/models/star_model.dart';
 import 'package:our_sky/services/astronomy_service.dart';
 import 'package:our_sky/ui/menu.dart';
@@ -12,14 +13,15 @@ import 'package:our_sky/ui/planet_viewer.dart';
 import '../bloc/bodies_cubit/bodies_cubit.dart';
 import '../painters/star_painter.dart';
 
-class View extends StatefulWidget {
-  const View({Key? key}) : super(key: key);
+class ViewScreen extends StatefulWidget {
+  const ViewScreen({Key? key}) : super(key: key);
 
   @override
-  State<View> createState() => _ViewState();
+  State<ViewScreen> createState() => _ViewScreenState();
 }
 
-class _ViewState extends State<View> with SingleTickerProviderStateMixin {
+class _ViewScreenState extends State<ViewScreen>
+    with SingleTickerProviderStateMixin {
   @override
   void initState() {
     _animationController = AnimationController(
@@ -105,7 +107,7 @@ class _ViewState extends State<View> with SingleTickerProviderStateMixin {
       _altitude,
       _dateTime.toString().split(' ')[0],
       _dateTime.toString().split(' ')[0],
-      '15:00:00',
+      monthTimes[_dateTime.month]!,
     );
 
     for (var body in bodiesCubit.bodiesModel!.data.table.rows) {
@@ -144,23 +146,14 @@ class _ViewState extends State<View> with SingleTickerProviderStateMixin {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: const Color.fromARGB(255, 1, 1, 53),
-        title: const FittedBox(
-          child: Text(
-            'Our Solar System',
-          ),
-        ),
+        backgroundColor: Colors.black,
         leading: IconButton(
           onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const Menu(),
-              ),
-            );
+            Navigator.pop(context);
           },
           icon: const Icon(
-            Icons.menu,
+            Icons.chevron_left,
+            color: Colors.white,
           ),
         ),
         actions: [
@@ -170,62 +163,56 @@ class _ViewState extends State<View> with SingleTickerProviderStateMixin {
             },
             icon: const Icon(
               Icons.calendar_month,
-            ),
-          ),
-          IconButton(
-            onPressed: () {
-              setState(() {
-                _showBar = !_showBar;
-              });
-            },
-            icon: Icon(
-              _showBar ? Icons.chevron_left : Icons.chevron_right,
+              color: Colors.white,
             ),
           ),
         ],
       ),
       body: Container(
         color: const Color.fromARGB(255, 1, 1, 53),
-        child: Stack(
-          children: [
-            _isLoading || !_showBar
-                ? const SizedBox()
-                : Positioned(
-                    top: 5,
-                    child: Material(
-                      color: Colors.transparent,
-                      child: Column(
-                        children: [
-                          Text(
-                            _dateTime.toString().split(' ')[0],
-                            style: const TextStyle(
-                              color: Colors.white,
-                            ),
+        child: _isLoading
+            ? const Center(
+                child: CircularProgressIndicator(),
+              )
+            : Stack(
+                children: [
+                  // _isLoading || !_showBar
+                  //     ? const SizedBox()
+                  //     : Positioned(
+                  //         top: 5,
+                  //         child: Material(
+                  //           color: Colors.transparent,
+                  //           child: Column(
+                  //             children: [
+                  //               // Text(
+                  //               //   _dateTime.toString().split(' ')[0],
+                  //               //   style: const TextStyle(
+                  //               //     color: Colors.white,
+                  //               //   ),
+                  //               // ),
+                  //               // Image.network(
+                  //               //   _moonImage,
+                  //               //   width: 100,
+                  //               //   height: 200,
+                  //               // ),
+                  //             ],
+                  //           ),
+                  //         ),
+                  //       ),
+                  InteractiveViewer(
+                    transformationController: viewTransformationController,
+                    minScale: 0.5,
+                    maxScale: 80,
+                    child: AnimatedBuilder(
+                      animation: _animationController!,
+                      builder: (context, child) {
+                        return CustomPaint(
+                          size: MediaQuery.of(context).size,
+                          painter: StarPainter(
+                            stars: _stars,
+                            animationValue: _animationController!.value,
                           ),
-                          Image.network(
-                            _moonImage,
-                            width: 100,
-                            height: 200,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-            InteractiveViewer(
-              transformationController: viewTransformationController,
-              minScale: 0.5,
-              maxScale: 80,
-              child: AnimatedBuilder(
-                animation: _animationController!,
-                builder: (context, child) {
-                  return CustomPaint(
-                    painter: StarPainter(
-                      stars: _stars,
-                      animationValue: _animationController!.value,
-                    ),
-                    child: _isLoading
-                        ? const Center(child: CircularProgressIndicator())
-                        : Stack(
+                          child: Stack(
                             children: [
                               for (var element in _bodies)
                                 Positioned(
@@ -308,12 +295,12 @@ class _ViewState extends State<View> with SingleTickerProviderStateMixin {
                                 ),
                             ],
                           ),
-                  );
-                },
+                        );
+                      },
+                    ),
+                  ),
+                ],
               ),
-            ),
-          ],
-        ),
       ),
     );
   }
